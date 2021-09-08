@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30804.86
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "grab-vaccine", "grab-vaccine.csproj", "{77FC7A56-6A1F-4CFA-919B-9F03D7DA8CEE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{77FC7A56-6A1F-4CFA-919B-9F03D7DA8CEE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77FC7A56-6A1F-4CFA-919B-9F03D7DA8CEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77FC7A56-6A1F-4CFA-919B-9F03D7DA8CEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77FC7A56-6A1F-4CFA-919B-9F03D7DA8CEE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E4E0EB97-5E30-4744-8CF8-58729A196284}
+	EndGlobalSection
+EndGlobal
