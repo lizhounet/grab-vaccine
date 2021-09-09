@@ -40,7 +40,7 @@ namespace grab_vaccine
                         default:
                             XTrace.WriteLine("输入无效！！！！");
                             break;
-                    }
+            }
                 }
             }
             catch (BusinessException ex)
