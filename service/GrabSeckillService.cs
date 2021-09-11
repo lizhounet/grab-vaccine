@@ -8,7 +8,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -20,15 +19,19 @@ namespace grab_vaccine.service
     public class GrabSeckillService
     {
         private readonly HttpService httpService = new HttpService();
+        private readonly ProxyIpPoolService ipPoolService = new ProxyIpPoolService();
         /// <summary>
         /// 开启秒杀
         /// </summary>
         public void StartSecKill()
         {
+
             model.VaccineInfo vaccine = YueMiaoConfig.Instance.Vaccine;
-            //疫苗开始时间(提前500ms，做准备动作)
+            //疫苗开始时间(提前2s，开始抢苗)
             DateTime startTime = vaccine.StartTime.AddMilliseconds(-500);
             string st = string.Empty;
+            //代理ip池
+            List<ProxyIpInfo> proxyIpInfos = new List<ProxyIpInfo>();
             //还没到时间，等待
             while (DateTime.Now < startTime)
             {
@@ -54,50 +57,81 @@ namespace grab_vaccine.service
                     }
                 }
             }
-            //if (string.IsNullOrEmpty(st)) {
-            //    try
-            //    {
-            //        st = httpService.GetSt(vaccine.Id.ToString());
-            //        XTrace.WriteLine($"获取st成功:{st}");
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        XTrace.WriteException(ex);
-            //        st = DateTime.Now.GetTotalMilliseconds().ToString();
-            //        XTrace.WriteLine($"获取st异常,准备使用本地时间戳:{st}");
-            //    }
-            //}
-            string orderId = string.Empty;
-            Parallel.For(0, 5, (index) =>
+            if (proxyIpInfos.Count <= 0)
             {
-                do
+                //获取代理ip
+                proxyIpInfos = ipPoolService.All("https");
+            }
+            string orderId = string.Empty;
+          //  proxyIpInfos = ipPoolService.AllTest().Select(t => new ProxyIpInfo() { proxy = t }).ToList();
+            XTrace.WriteLine($"可用代理ip数量：{proxyIpInfos.Count}个");
+            //如果没有代理ip 则不使用代理ip 使用少量线程秒杀(2-3个线程)
+            if (proxyIpInfos.Count <= 0)
+            {
+                Parallel.For(0, 3, (index) =>
                 {
-                    try
+                    do
                     {
-                        st = DateTime.Now.GetTotalMilliseconds().ToString();
-                        orderId = httpService.secKill(vaccine.Id.ToString(), "1", YueMiaoConfig.Instance.MemberId.ToString(),
-                           YueMiaoConfig.Instance.IdCard, st);
-                        if (!string.IsNullOrEmpty(orderId))
+                        try
                         {
-                            XTrace.WriteLine("抢购成功");
-                            break;
+                            st = DateTime.Now.GetTotalMilliseconds().ToString();
+                            orderId = httpService.secKill(vaccine.Id.ToString(), "1", YueMiaoConfig.Instance.MemberId.ToString(),
+                               YueMiaoConfig.Instance.IdCard, st);
+                            if (!string.IsNullOrEmpty(orderId))
+                            {
+                                XTrace.WriteLine("抢购成功");
+                                break;
+                            }
+                        }
+                        catch (BusinessException bex)
+                        {
+                            XTrace.WriteLine(bex.Message);
+                        }
+                        catch (Exception ex)
+                        {
+                            XTrace.WriteException(ex);
+                        }
+                        finally
+                        {
+                            Thread.Sleep(500);
                         }
                     }
-                    catch (BusinessException bex)
-                    {
-                        XTrace.WriteLine(bex.Message);
-                    }
-                    catch (Exception ex)
-                    {
-                        XTrace.WriteException(ex);
-                    }
-                    finally
-                    {
-                        Thread.Sleep(400);
-                    }
-                }
-                while (string.IsNullOrEmpty(orderId));
-            });
+                    while (string.IsNullOrEmpty(orderId));
+                });
+            }
+            else
+            {
+                Parallel.ForEach(proxyIpInfos, (proxyIpInfo) =>
+                {
+                    //do
+                    //{
+                        try
+                        {
+                            st = DateTime.Now.GetTotalMilliseconds().ToString();
+                            orderId = httpService.secKill(vaccine.Id.ToString(), "1", YueMiaoConfig.Instance.MemberId.ToString(),
+                               YueMiaoConfig.Instance.IdCard, st, new System.Net.WebProxy(proxyIpInfo.proxy));
+                            if (!string.IsNullOrEmpty(orderId))
+                            {
+                                XTrace.WriteLine("抢购成功");
+                                // break;
+                            }
+                        }
+                        catch (BusinessException bex)
+                        {
+                            XTrace.WriteLine(bex.Message);
+                        }
+                        catch (Exception ex)
+                        {
+                            XTrace.WriteException(ex);
+                        }
+                        finally
+                        {
+                            Thread.Sleep(500);
+                        }
+                   // }
+                    //while (string.IsNullOrEmpty(orderId));
+                });
+            }
             XTrace.WriteLine(string.IsNullOrEmpty(orderId) ? "抢购失败" : "抢购成功，请登录约苗小程序查看");
 
         }
@@ -145,7 +179,7 @@ namespace grab_vaccine.service
                 });
             }
 
-            return vaccineInfos.Where(t => t.StartTime >= DateTime.Now).ToList();
+            return vaccineInfos.ToList();
         }
     }
 }

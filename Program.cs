@@ -2,16 +2,10 @@
 using grab_vaccine.exception;
 using grab_vaccine.model;
 using grab_vaccine.service;
-using grab_vaccine.utils;
-using Masuit.Tools.DateTimeExt;
-using Masuit.Tools.Security;
-using Microsoft.Extensions.Configuration;
 using NewLife.Log;
+using RestSharp;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace grab_vaccine
 {
@@ -21,6 +15,32 @@ namespace grab_vaccine
         static void Main(string[] args)
         {
             XTrace.UseConsole();
+            //RestClient client = new RestClient("https://www.89ip.cn/api.html");
+            // client.Proxy = new System.Net.WebProxy("153.122.72.63:80");
+            //var request = new RestRequest("", Method.GET);
+            //IRestResponse restResponse = client.Execute(request);
+            //mXTrace.WriteLine($"验证代理ip结果：{restResponse.Content}");
+
+
+            //ProxyIpPoolService proxyIpPool = new ProxyIpPoolService();
+            //List<string> proxyIpInfos = proxyIpPool.AllTest();
+            //proxyIpInfos.ForEach(proxyIp =>
+            //{
+            //    try
+            //    {
+            //        XTrace.WriteLine($"当前代理ip：{proxyIp}");
+            //        RestClient client = new RestClient("http://icanhazip.com/");
+            //        client.Proxy = new System.Net.WebProxy(proxyIp);
+            //        var request = new RestRequest("", Method.GET);
+            //        IRestResponse restResponse = client.Execute(request);
+            //        XTrace.WriteLine($"验证代理ip结果：{restResponse.Content}");
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        XTrace.WriteException(ex);
+            //    }
+            //});
+            //Console.ReadKey();
             try
             {
                 while (true)
@@ -40,7 +60,7 @@ namespace grab_vaccine
                         default:
                             XTrace.WriteLine("输入无效！！！！");
                             break;
-            }
+                    }
                 }
             }
             catch (BusinessException ex)

@@ -8,16 +8,12 @@ using Newtonsoft.Json;
 using RestSharp;
 using System;
 using System.Collections.Generic;
-using System.Collections.Concurrent;
-using grab_vaccine.utils;
-using System.Threading.Tasks;
-using System.Linq;
+using System.Net;
 
 namespace grab_vaccine.service
 {
     public class HttpService
     {
-        private RestClient client = new RestClient("https://miaomiao.scmttec.com");
 
         /// <summary>
         /// 获取秒杀资格
@@ -27,8 +23,9 @@ namespace grab_vaccine.service
         /// <param name="linkmanId">接种人ID</param>
         /// <param name="idCard">接种人身份证号码</param>
         /// <param name="st">时间戳</param>
+        /// <param name="webProxy">代理ip</param>
         /// <returns>返回订单ID</returns>
-        public String secKill(String seckillId, String vaccineIndex, String linkmanId, String idCard, String st)
+        public String secKill(String seckillId, String vaccineIndex, String linkmanId, String idCard, String st, WebProxy webProxy = null)
         {
             String path = "seckill/seckill/subscribe.do";
             Dictionary<string, string> param = new Dictionary<string, string>();
@@ -36,9 +33,10 @@ namespace grab_vaccine.service
             param.Add("vaccineIndex", vaccineIndex);
             param.Add("linkmanId", linkmanId);
             param.Add("idCardNo", idCard);
+            param.Add("random", new Random().Next(0,1000).ToString());
             Dictionary<string, string> header = new Dictionary<string, string>();
             header.Add("ecc-hs", EccHs(seckillId, st));
-            return Send(path, param, header);
+            return Send(path, param, header, webProxy);
         }
 
         /// <summary>
@@ -83,7 +81,7 @@ namespace grab_vaccine.service
         /// </summary>
         /// <param name="regionCode">行政区域code</param>
         /// <returns></returns>
-        public List<VaccineInfo> GetVaccineList(string regionCode)
+        public List<VaccineInfo> GetVaccineList(string regionCode, WebProxy webProxy = null)
         {
             List<VaccineInfo> vaccineInfos = null;
             //接口出错最多重试10次
@@ -98,7 +96,7 @@ namespace grab_vaccine.service
                     param.Add("limit", "100");
                     param.Add("regionCode", regionCode);
                     XTrace.WriteLine($"{regionCode}查询疫苗");
-                    String json = Send(path, param, null);
+                    String json = Send(path, param, null, webProxy);
                     vaccineInfos = JsonConvert.DeserializeObject<List<VaccineInfo>>(json);
                     break;
                 }
@@ -122,10 +120,16 @@ namespace grab_vaccine.service
         /// <param name="path">请求路径</param>
         /// <param name="param">请求参数</param>
         /// <param name="extHeader">Header</param>
+        /// <param name="webProxy">代理ip</param>
         /// <returns></returns>
-        private string Send(String path, Dictionary<String, String> param, Dictionary<string, string> extHeader)
+        private string Send(String path, Dictionary<String, String> param, Dictionary<string, string> extHeader, WebProxy webProxy = null)
         {
-            // RestClient client = new RestClient("https://miaomiao.scmttec.com");
+            RestClient client = new RestClient("https://miaomiao.scmttec.com");
+            if (webProxy != null)
+            {
+                XTrace.WriteLine($"设置代理ip：{webProxy.Address}");
+                client.Proxy = webProxy;
+            }
             var request = new RestRequest(path, Method.GET);
             if (param != null && param.Count > 0)
             {
