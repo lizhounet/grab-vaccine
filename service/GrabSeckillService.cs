@@ -28,7 +28,7 @@ namespace grab_vaccine.service
 
             model.VaccineInfo vaccine = YueMiaoConfig.Instance.Vaccine;
             //疫苗开始时间(提前2s，开始抢苗)
-            DateTime startTime = vaccine.StartTime.AddMilliseconds(-500);
+            DateTime startTime = vaccine.StartTime.AddMilliseconds(-2000);
             string st = string.Empty;
             //代理ip池
             List<ProxyIpInfo> proxyIpInfos = new List<ProxyIpInfo>();
@@ -63,7 +63,7 @@ namespace grab_vaccine.service
                 proxyIpInfos = ipPoolService.All("https");
             }
             string orderId = string.Empty;
-          //  proxyIpInfos = ipPoolService.AllTest().Select(t => new ProxyIpInfo() { proxy = t }).ToList();
+            //   proxyIpInfos = ipPoolService.AllTest().Select(t => new ProxyIpInfo() { proxy = t }).ToList();
             XTrace.WriteLine($"可用代理ip数量：{proxyIpInfos.Count}个");
             //如果没有代理ip 则不使用代理ip 使用少量线程秒杀(2-3个线程)
             if (proxyIpInfos.Count <= 0)
@@ -93,7 +93,7 @@ namespace grab_vaccine.service
                         }
                         finally
                         {
-                            Thread.Sleep(500);
+                            Thread.Sleep(400);
                         }
                     }
                     while (string.IsNullOrEmpty(orderId));
@@ -101,19 +101,27 @@ namespace grab_vaccine.service
             }
             else
             {
+                //添加两个本地ip抢
+                proxyIpInfos.Add(new ProxyIpInfo());
+                proxyIpInfos.Add(new ProxyIpInfo());
                 Parallel.ForEach(proxyIpInfos, (proxyIpInfo) =>
                 {
-                    //do
-                    //{
+                    do
+                    {
                         try
                         {
                             st = DateTime.Now.GetTotalMilliseconds().ToString();
+                            System.Net.WebProxy webProxy = null;
+                            if (!string.IsNullOrEmpty(proxyIpInfo.proxy))
+                            {
+                                webProxy = new System.Net.WebProxy(proxyIpInfo.proxy);
+                            }
                             orderId = httpService.secKill(vaccine.Id.ToString(), "1", YueMiaoConfig.Instance.MemberId.ToString(),
-                               YueMiaoConfig.Instance.IdCard, st, new System.Net.WebProxy(proxyIpInfo.proxy));
+                               YueMiaoConfig.Instance.IdCard, st, webProxy);
                             if (!string.IsNullOrEmpty(orderId))
                             {
                                 XTrace.WriteLine("抢购成功");
-                                // break;
+                                break;
                             }
                         }
                         catch (BusinessException bex)
@@ -126,10 +134,10 @@ namespace grab_vaccine.service
                         }
                         finally
                         {
-                            Thread.Sleep(500);
+                            Thread.Sleep(400);
                         }
-                   // }
-                    //while (string.IsNullOrEmpty(orderId));
+                    }
+                    while (string.IsNullOrEmpty(orderId));
                 });
             }
             XTrace.WriteLine(string.IsNullOrEmpty(orderId) ? "抢购失败" : "抢购成功，请登录约苗小程序查看");

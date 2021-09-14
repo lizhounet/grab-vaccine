@@ -33,7 +33,6 @@ namespace grab_vaccine.service
             param.Add("vaccineIndex", vaccineIndex);
             param.Add("linkmanId", linkmanId);
             param.Add("idCardNo", idCard);
-            param.Add("random", new Random().Next(0,1000).ToString());
             Dictionary<string, string> header = new Dictionary<string, string>();
             header.Add("ecc-hs", EccHs(seckillId, st));
             return Send(path, param, header, webProxy);

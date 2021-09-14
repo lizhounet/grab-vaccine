@@ -99,7 +99,7 @@ namespace grab_vaccine.service
         /// <returns></returns>
         public List<string> AllTest()
         {
-            string url = "http://www.zdopen.com/PrivateProxy/GetIP/?api=202109112234541589&akey=353e4c90bccf6a67&count=20&fitter=2&timespan=6&type=3";
+            string url = "http://www.zdopen.com/CotenancyProxy/GetIP/?api=202109121818484103&akey=e5eeb873d7166d25&count=20&pro=1&timespan=0&order=2&type=3";
             RestClient client = new RestClient(url);
             var request = new RestRequest("", Method.GET);
             IRestResponse restResponse = client.Execute(request);

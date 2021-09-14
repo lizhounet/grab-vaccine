@@ -21,7 +21,6 @@ namespace grab_vaccine
             //IRestResponse restResponse = client.Execute(request);
             //mXTrace.WriteLine($"验证代理ip结果：{restResponse.Content}");
 
-
             //ProxyIpPoolService proxyIpPool = new ProxyIpPoolService();
             //List<string> proxyIpInfos = proxyIpPool.AllTest();
             //proxyIpInfos.ForEach(proxyIp =>
