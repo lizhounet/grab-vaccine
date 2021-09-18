@@ -93,12 +93,11 @@ namespace grab_vaccine
         }
         static void SecKillVaccine()
         {
-
             XTrace.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(YueMiaoConfig.Instance));
             XTrace.WriteLine("接种人员：");
             XTrace.WriteLine($"人员id：{YueMiaoConfig.Instance.MemberId},姓名：{YueMiaoConfig.Instance.MemberName},身份证：{YueMiaoConfig.Instance.IdCard}");
             XTrace.WriteLine("疫苗信息：");
-            XTrace.WriteLine($"疫苗id：{YueMiaoConfig.Instance.Vaccine.Id},疫苗名称：{YueMiaoConfig.Instance.Vaccine.VaccineName}，疫苗地址：{YueMiaoConfig.Instance.Vaccine.Address}");
+            XTrace.WriteLine($"疫苗id：{YueMiaoConfig.Instance.Vaccine.Id},疫苗名称：{YueMiaoConfig.Instance.Vaccine.VaccineName}，疫苗地址：{YueMiaoConfig.Instance.Vaccine.Address},开始时间：{YueMiaoConfig.Instance.Vaccine.StartTime.ToString("yyyy-MM-dd HH:mm:ss")}");
             XTrace.WriteLine("请核实以上信息是否正确！！！！");
             XTrace.WriteLine("回车键启动秒杀!!!!");
             Console.ReadKey();

@@ -27,34 +27,50 @@ namespace grab_vaccine.service
         {
 
             model.VaccineInfo vaccine = YueMiaoConfig.Instance.Vaccine;
-            //疫苗开始时间(提前2s，开始抢苗)
-            DateTime startTime = vaccine.StartTime.AddMilliseconds(-2000);
+            //疫苗开始时间(提前500ms，开始抢苗)
+            DateTime startTime = vaccine.StartTime.AddMilliseconds(-500);
             string st = string.Empty;
             //代理ip池
             List<ProxyIpInfo> proxyIpInfos = new List<ProxyIpInfo>();
+            TimeSpan timeSpan = default;
             //还没到时间，等待
             while (DateTime.Now < startTime)
             {
-                TimeSpan timeSpan = (startTime - DateTime.Now);
-                XTrace.WriteLine($"疫苗{vaccine.Id}-{vaccine.VaccineName}-{vaccine.Address}还未到开始时间，等待中,剩余：{timeSpan.Days}天{timeSpan.Hours}小时{timeSpan.Minutes}分{timeSpan.Seconds}秒");
-                Thread.Sleep(1000);
-                if (timeSpan.Minutes < 2)
+                TimeSpan timeSpan1 = (startTime - DateTime.Now);
+                if (timeSpan1.Seconds == timeSpan.Seconds)
                 {
-                    if (string.IsNullOrEmpty(st))
+                    //一秒内跳过
+                    continue;
+                }
+                else
+                {
+                    timeSpan = timeSpan1;
+                }
+                XTrace.WriteLine($"疫苗{vaccine.Id}-{vaccine.VaccineName}-{vaccine.Address}还未到开始时间，等待中,剩余：{timeSpan.Days}天{timeSpan.Hours}小时{timeSpan.Minutes}分{timeSpan.Seconds}秒");
+                Thread.Sleep(100);
+                if (timeSpan.Seconds < 30 && timeSpan.Minutes <= 0)
+                {
+                    //提前30s获取代理ip
+                    if (proxyIpInfos.Count <= 0)
                     {
-                        //提前一分钟获取st
-                        try
-                        {
-                            st = httpService.GetSt(vaccine.Id.ToString());
-                            XTrace.WriteLine($"获取st成功:{st}");
-                        }
-                        catch (Exception ex)
-                        {
-                            XTrace.WriteException(ex);
-                            st = DateTime.Now.GetTotalMilliseconds().ToString();
-                            XTrace.WriteLine($"获取st异常,准备使用本地时间戳:{st}");
-                        }
+                        //获取代理ip
+                        proxyIpInfos = ipPoolService.All("https");
                     }
+                    //if (string.IsNullOrEmpty(st))
+                    //{
+                    //    //提前一分钟获取st
+                    //    try
+                    //    {
+                    //        st = httpService.GetSt(vaccine.Id.ToString());
+                    //        XTrace.WriteLine($"获取st成功:{st}");
+                    //    }
+                    //    catch (Exception ex)
+                    //    {
+                    //        XTrace.WriteException(ex);
+                    //        st = DateTime.Now.GetTotalMilliseconds().ToString();
+                    //        XTrace.WriteLine($"获取st异常,准备使用本地时间戳:{st}");
+                    //    }
+                    //}
                 }
             }
             if (proxyIpInfos.Count <= 0)
@@ -134,7 +150,7 @@ namespace grab_vaccine.service
                         }
                         finally
                         {
-                            Thread.Sleep(400);
+                            Thread.Sleep(500);
                         }
                     }
                     while (string.IsNullOrEmpty(orderId));
