@@ -37,9 +37,10 @@ namespace grab_vaccine.conf
          */
         public ConcurrentDictionary<string, string> Cookies { set; get; } = new ConcurrentDictionary<string, string>();
 
-        private static readonly YueMiaoConfig instance = null;
+        private static YueMiaoConfig instance = null;
         public static YueMiaoConfig Instance
         {
+            set { instance = value; }
             get
             {
                 return instance;
@@ -48,13 +49,17 @@ namespace grab_vaccine.conf
 
         static YueMiaoConfig()
         {
+            ReloadYueMiaoConfig();
+        }
+        public static void ReloadYueMiaoConfig()
+        {
             var build = new ConfigurationBuilder();
             build.SetBasePath(Directory.GetCurrentDirectory());
             build.AddJsonFile("//appsettings.json", true, true);
             var config = build.Build();
             instance = config.GetSection("YueMiaoConfig").Get<YueMiaoConfig>();
             string path = Path.Combine(Directory.GetCurrentDirectory(), "reqHeader.txt");
-         //   path = @"D:\zhouli\work\code\java\temp\reqHeader.txt";
+            //   path = @"D:\zhouli\work\code\java\temp\reqHeader.txt";
             string reqHeader = File.ReadAllText(path);
             //设置cookie和tk
             string[] data = ParseUtil.ParseHeader(reqHeader);

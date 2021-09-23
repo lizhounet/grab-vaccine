@@ -94,7 +94,7 @@ namespace grab_vaccine.service
                     param.Add("offset", "0");
                     param.Add("limit", "100");
                     param.Add("regionCode", regionCode);
-                    XTrace.WriteLine($"{regionCode}查询疫苗");
+                    //  XTrace.WriteLine($"{regionCode}查询疫苗");
                     String json = Send(path, param, null, webProxy);
                     vaccineInfos = JsonConvert.DeserializeObject<List<VaccineInfo>>(json);
                     break;
@@ -143,7 +143,7 @@ namespace grab_vaccine.service
             {
                 request.AddHeaders(extHeader);
             }
-            XTrace.WriteLine($"发送请求：{client.BaseUrl}{path}");
+           // XTrace.WriteLine($"发送请求：{client.BaseUrl}{path}");
             IRestResponse response = client.Execute(request);
             dealHeader(response);
             // XTrace.WriteLine($"返回值：{response.Content}");
